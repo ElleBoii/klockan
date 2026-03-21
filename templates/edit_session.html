@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit session</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Edit session</h1>
+
+        <p><a href="{{ url_for('manage_sessions') }}">Back to manage sessions</a></p>
+
+        {% if message %}
+            <p class="message success-message">{{ message }}</p>
+        {% endif %}
+        {% if error %}
+            <p class="message">{{ error }}</p>
+        {% endif %}
+
+        <h2>Session info</h2>
+        <form method="POST" action="{{ url_for('save_session_info', session_id=klockan_session.id) }}" class="simple-form">
+            <div class="form-group">
+                <label for="date">Date</label>
+                <input type="date" id="date" name="date" value="{{ klockan_session.date }}" required>
+            </div>
+            <div class="form-group">
+                <label for="pool_length">Pool length</label>
+                <select id="pool_length" name="pool_length" required>
+                    {% for length in pool_lengths %}
+                        <option value="{{ length }}" {% if length == klockan_session.pool_length %}selected{% endif %}>
+                            {{ length }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <button type="submit">Save changes</button>
+            </div>
+        </form>
+
+        <h2>Results</h2>
+
+        {% for round_number, results in results_by_round.items() %}
+            <h3>Round {{ round_number }}</h3>
+            {% if results %}
+                <ul class="name-list">
+                    {% for result in results %}
+                        <li class="name-list-item">
+                            <span>
+                                {{ result.swimmer.name }} —
+                                {{ result.stroke }} —
+                                {{ result.equipment }} —
+                                {{ result.failed_start_time }} s
+                            </span>
+                            <form method="POST" action="{{ url_for('delete_session_result', session_id=klockan_session.id) }}" class="remove-form">
+                                <input type="hidden" name="result_id" value="{{ result.id }}">
+                                <button type="submit" class="remove-button">✕</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty-round">No results for this round.</p>
+            {% endif %}
+        {% endfor %}
+
+        <h2>Add a result</h2>
+        <form method="POST" action="{{ url_for('add_session_result', session_id=klockan_session.id) }}" class="simple-form">
+            <div class="form-group">
+                <label for="round_number">Round</label>
+                <select id="round_number" name="round_number" required>
+                    <option value="">Select round</option>
+                    {% for i in range(1, klockan_session.max_rounds + 1) %}
+                        <option value="{{ i }}">Round {{ i }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="swimmer_id">Swimmer</label>
+                <select id="swimmer_id" name="swimmer_id" required>
+                    <option value="">Select swimmer</option>
+                    {% for swimmer in swimmers %}
+                        <option value="{{ swimmer.id }}">{{ swimmer.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="stroke">Stroke</label>
+                <select id="stroke" name="stroke" required>
+                    <option value="">Select stroke</option>
+                    {% for stroke in strokes %}
+                        <option value="{{ stroke }}">{{ stroke }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="equipment">Equipment</label>
+                <select id="equipment" name="equipment" required>
+                    <option value="">Select equipment</option>
+                    {% for equipment in equipment_options %}
+                        <option value="{{ equipment }}">{{ equipment }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="failed_start_time">Failed start time (s)</label>
+                <input type="number" id="failed_start_time" name="failed_start_time" min="1" required>
+            </div>
+            <div>
+                <button type="submit">Add result</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

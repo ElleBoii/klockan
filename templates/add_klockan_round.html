@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Klockan round</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Round {{ round_number }} of {{ max_rounds }}</h1>
+        <p class="page-subtitle">Add swimmer results for this round.</p>
+
+        <p><a href="{{ url_for('index') }}">Back to results</a></p>
+
+        <div class="session-info-box">
+            <strong>Date:</strong> {{ session_info.date }}<br>
+            <strong>Pool length:</strong> {{ session_info.pool_length }}<br>
+            <strong>Max rounds:</strong> {{ session_info.max_rounds }}
+        </div>
+
+        {% if message %}
+            <p class="message">{{ message }}</p>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('add_klockan_round_result', round_number=round_number) }}" class="simple-form">
+            <div class="form-group">
+                <label for="swimmer_id">Swimmer</label>
+                <select id="swimmer_id" name="swimmer_id" required autofocus>
+                    <option value="">Select swimmer</option>
+                    {% for swimmer in swimmers %}
+                        <option value="{{ swimmer.id }}">{{ swimmer.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="stroke">Stroke</label>
+                <select id="stroke" name="stroke" required>
+                    <option value="">Select stroke</option>
+                    {% for stroke in strokes %}
+                        <option value="{{ stroke }}">{{ stroke }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="equipment">Equipment</label>
+                <select id="equipment" name="equipment" required>
+                    <option value="">Select equipment</option>
+                    {% for equipment in equipment_options %}
+                        <option value="{{ equipment }}">{{ equipment }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="failed_start_time">Failed start time (s)</label>
+                <input type="number" id="failed_start_time" name="failed_start_time" min="1" required>
+            </div>
+
+            <button type="submit">Add result</button>
+        </form>
+
+        {% if current_round_results %}
+            <h2>Entered results for round {{ round_number }}</h2>
+            <ul class="name-list">
+                {% for result in current_round_results %}
+                    <li class="name-list-item">
+                        <span>
+                            {{ result.swimmer_name }} —
+                            {{ result.stroke }} —
+                            {{ result.equipment }} —
+                            {{ result.failed_start_time }} s
+                        </span>
+
+                        <form method="POST" action="{{ url_for('remove_klockan_round_result', round_number=round_number) }}" class="remove-form">
+                            <input type="hidden" name="swimmer_id" value="{{ result.swimmer_id }}">
+                            <button type="submit" class="remove-button">✕</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <div class="round-actions">
+            <form method="POST" action="{{ url_for('next_klockan_round', round_number=round_number) }}">
+                <button type="submit" class="secondary-action">
+                    {% if round_number < max_rounds %}
+                        Next round
+                    {% else %}
+                        Review session
+                    {% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

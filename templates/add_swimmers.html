@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add swimmers</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Add swimmers</h1>
+
+        <p><a href="{{ url_for('index') }}">Back to results</a></p>
+
+        {% if message %}
+            <p class="message">{{ message }}</p>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('add_swimmer_to_list') }}" class="simple-form">
+            <div class="form-group">
+                <label for="name">Swimmer name</label>
+                <input type="text" id="name" name="name" required autofocus>
+            </div>
+
+            <button type="submit">Add</button>
+        </form>
+
+        {% if pending_swimmers %}
+            <h2>Entered names</h2>
+            <ul class="name-list">
+                {% for name in pending_swimmers %}
+                    <li class="name-list-item">
+                        <span>{{ name }}</span>
+                        <form method="POST" action="{{ url_for('remove_swimmer_from_list') }}" class="remove-form">
+                            <input type="hidden" name="name" value="{{ name }}">
+                            <button type="submit" class="remove-button">✕</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <p>
+                <a class="next-button" href="{{ url_for('confirm_swimmers') }}">Next</a>
+            </p>
+        {% endif %}
+    </div>
+</body>
+</html>

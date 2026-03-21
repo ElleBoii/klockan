@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Klockan session</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Confirm Klockan session</h1>
+
+        <p>
+            <strong>Date:</strong> {{ session_info.date }}<br>
+            <strong>Pool length:</strong> {{ session_info.pool_length }}<br>
+            <strong>Max rounds:</strong> {{ session_info.max_rounds }}
+        </p>
+
+        {% for round_number, round_results in results_by_round.items() %}
+            <h2>Round {{ round_number }}</h2>
+
+            {% if round_results %}
+                <ul class="name-list">
+                    {% for result in round_results %}
+                        <li class="name-list-item">
+                            <span>
+                                {{ result.swimmer_name }} —
+                                {{ result.stroke }} —
+                                {{ result.equipment }} —
+                                {{ result.failed_start_time }} s
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No results entered for this round.</p>
+            {% endif %}
+        {% endfor %}
+
+        <div class="button-row">
+            <a class="secondary-button" href="{{ url_for('add_klockan_round', round_number=session_info.max_rounds) }}">Back</a>
+
+            <form method="POST" action="{{ url_for('save_klockan_session') }}">
+                <button type="submit">Confirm and save</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

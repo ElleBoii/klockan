@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage sessions</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Manage sessions</h1>
+        <p class="page-subtitle">Delete a session and all its results.</p>
+
+        <p><a href="{{ url_for('index') }}">Back to results</a></p>
+
+        {% if message %}
+            <p class="message">{{ message }}</p>
+        {% endif %}
+
+        {% if sessions %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Pool length</th>
+                        <th>Rounds</th>
+                        <th>Results</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in sessions %}
+                        <tr>
+                            <td>{{ s.date }}</td>
+                            <td>{{ s.pool_length }}</td>
+                            <td>{{ s.max_rounds }}</td>
+                            <td>{{ s.results | length }}</td>
+                            <td class="action-buttons">
+                                <a class="edit-button" href="{{ url_for('edit_session', session_id=s.id) }}">Edit</a>
+                                <a class="deactivate-button button-link" href="{{ url_for('confirm_delete_session', session_id=s.id) }}">Delete</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No sessions found. <a href="{{ url_for('add_klockan_session') }}">Add a session</a> first.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm delete session</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Delete session?</h1>
+        <p class="page-subtitle">This will permanently delete the session and all its results.</p>
+
+        <p><a href="{{ url_for('manage_sessions') }}">Back to manage sessions</a></p>
+
+        <div class="session-info-box">
+            <strong>Date:</strong> {{ klockan_session.date }}<br>
+            <strong>Pool length:</strong> {{ klockan_session.pool_length }}<br>
+            <strong>Rounds:</strong> {{ klockan_session.max_rounds }}<br>
+            <strong>Total results:</strong> {{ klockan_session.results | length }}
+        </div>
+
+        {% for round_number, results in results_by_round.items() %}
+            <h2>Round {{ round_number }}</h2>
+            {% if results %}
+                <ul class="name-list">
+                    {% for result in results %}
+                        <li class="name-list-item">
+                            <span>
+                                {{ result.swimmer.name }} —
+                                {{ result.stroke }} —
+                                {{ result.equipment }} —
+                                {{ result.failed_start_time }} s
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No results for this round.</p>
+            {% endif %}
+        {% endfor %}
+
+        <div class="button-row">
+            <form method="POST" action="{{ url_for('delete_session') }}">
+                <input type="hidden" name="session_id" value="{{ klockan_session.id }}">
+                <button type="submit" class="deactivate-button">Yes, delete everything</button>
+            </form>
+            <a class="secondary-button" href="{{ url_for('manage_sessions') }}">Cancel</a>
+        </div>
+    </div>
+</body>
+</html>

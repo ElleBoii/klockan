@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm swimmers</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Confirm swimmers</h1>
+
+        <p>Please confirm that these names should be added.</p>
+
+        <ul class="name-list">
+            {% for name in pending_swimmers %}
+                <li class="name-list-item">
+                    <span>{{ name }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <div class="button-row">
+            <a class="secondary-button" href="{{ url_for('add_swimmers') }}">Back</a>
+
+            <form method="POST" action="{{ url_for('save_confirmed_swimmers') }}">
+                <button type="submit">Confirm</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

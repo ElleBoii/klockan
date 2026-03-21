@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Klockan session</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Add Klockan session</h1>
+
+        <p><a href="{{ url_for('index') }}">Back to results</a></p>
+
+        {% if message %}
+            <p class="message">{{ message }}</p>
+        {% endif %}
+
+        <form method="POST" class="simple-form">
+            <div class="form-group">
+                <label for="date">Date</label>
+                <input type="date" id="date" name="date" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="pool_length">Pool length</label>
+                <select id="pool_length" name="pool_length" required>
+                    <option value="">Select pool length</option>
+                    {% for length in pool_lengths %}
+                        <option value="{{ length }}">{{ length }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="max_rounds">Max rounds</label>
+                <select id="max_rounds" name="max_rounds" required>
+                    <option value="">Select max rounds</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
+
+            <button type="submit">Next</button>
+        </form>
+    </div>
+</body>
+</html>
