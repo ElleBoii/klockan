@@ -29,7 +29,7 @@
                 <div class="form-group">
                     <label for="swimmer">Swimmer</label>
                     <select name="swimmer" id="swimmer">
-                        <option value="">All swimmers</option>
+                        <option value="">{% if show_only_active %}All active swimmers{% else %}All swimmers{% endif %}</option>
                         {% for swimmer in swimmers %}
                             <option value="{{ swimmer.name }}" {% if swimmer.name == selected_swimmer %}selected{% endif %}>
                                 {{ swimmer.name }}
@@ -82,6 +82,7 @@
                     Show only active swimmers
                 </label>
                 <button type="submit">Filter results</button>
+                <a href="{{ url_for('index') }}" class="clear-button">Clear filters</a>
             </div>
         </form>
 

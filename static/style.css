@@ -339,6 +339,23 @@ button:hover {
     background: #b71c1c;
 }
 
+.clear-button {
+    background: #d32f2f;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 14px 18px;
+    font-size: 1rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.clear-button:hover {
+    background: #b71c1c;
+}
+
 .status-active {
     color: #2e7d32;
     font-weight: bold;

@@ -1,3 +1,4 @@
+from datetime import timedelta
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -17,6 +18,7 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///klockan.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = "change-this-to-a-random-secret-key"
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=1)
 
 db.init_app(app)
 
@@ -61,6 +63,7 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password_hash, password):
+            session.permanent = True
             login_user(user)
             return redirect(url_for("index"))
         else:
@@ -244,7 +247,7 @@ def save_confirmed_swimmers():
     else:
         session["swimmer_message"] = "No swimmers were added because they already exist."
 
-    return redirect(url_for("add_swimmers"))
+    return redirect(url_for("index"))
 
 
 @app.route("/add-klockan-session", methods=["GET", "POST"])
@@ -289,6 +292,9 @@ def add_klockan_session():
 @login_required
 def add_klockan_round(round_number):
     show_only_active = request.args.get("show_only_active", "1") == "1"
+    prefill_stroke = request.args.get("stroke", "")
+    prefill_equipment = request.args.get("equipment", "")
+    prefill_failed_start_time = request.args.get("failed_start_time", "")
     
     pending = get_pending_klockan()
 
@@ -317,6 +323,7 @@ def add_klockan_round(round_number):
                 "equipment": result["equipment"],
                 "failed_start_time": result["failed_start_time"]
             })
+    current_round_results.sort(key=lambda x: x["failed_start_time"], reverse=True)
 
     return render_template(
         "add_klockan_round.html",
@@ -329,6 +336,9 @@ def add_klockan_round(round_number):
         current_round_results=current_round_results,
         message=message,
         show_only_active=show_only_active,
+        prefill_stroke=prefill_stroke,
+        prefill_equipment=prefill_equipment,
+        prefill_failed_start_time=prefill_failed_start_time,
     )
 
 
@@ -437,6 +447,8 @@ def confirm_klockan_session():
             "failed_start_time": result["failed_start_time"],
             "swimmer_id": result["swimmer_id"]
         })
+    for round_results in results_by_round.values():
+        round_results.sort(key=lambda x: x["failed_start_time"], reverse=True)
 
     return render_template(
         "confirm_klockan_session.html",

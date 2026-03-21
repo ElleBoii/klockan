@@ -25,9 +25,25 @@
 
         <form method="POST" action="{{ url_for('add_klockan_round_result', round_number=round_number) }}" class="simple-form">
             <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="show_only_active_toggle" {% if show_only_active %}checked{% endif %}
+                        onchange="
+                            var stroke = document.getElementById('stroke').value;
+                            var equipment = document.getElementById('equipment').value;
+                            var time = document.getElementById('failed_start_time').value;
+                            var url = '{{ url_for('add_klockan_round', round_number=round_number) }}?show_only_active=' + (this.checked ? '1' : '0');
+                            if (stroke) url += '&stroke=' + encodeURIComponent(stroke);
+                            if (equipment) url += '&equipment=' + encodeURIComponent(equipment);
+                            if (time) url += '&failed_start_time=' + encodeURIComponent(time);
+                            window.location.href = url;
+                        ">
+                    Show only active swimmers
+                </label>
+            </div>
+            <div class="form-group">
                 <label for="swimmer_id">Swimmer</label>
                 <select id="swimmer_id" name="swimmer_id" required autofocus>
-                    <option value="">Select swimmer</option>
+                    <option value="">{% if show_only_active %}All active swimmers{% else %}All swimmers{% endif %}</option>
                     {% for swimmer in swimmers %}
                         <option value="{{ swimmer.id }}">{{ swimmer.name }}</option>
                     {% endfor %}
@@ -39,7 +55,7 @@
                 <select id="stroke" name="stroke" required>
                     <option value="">Select stroke</option>
                     {% for stroke in strokes %}
-                        <option value="{{ stroke }}">{{ stroke }}</option>
+                        <option value="{{ stroke }}" {% if stroke == prefill_stroke %}selected{% endif %}>{{ stroke }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -49,14 +65,14 @@
                 <select id="equipment" name="equipment" required>
                     <option value="">Select equipment</option>
                     {% for equipment in equipment_options %}
-                        <option value="{{ equipment }}">{{ equipment }}</option>
+                        <option value="{{ equipment }}" {% if equipment == prefill_equipment %}selected{% endif %}>{{ equipment }}</option>
                     {% endfor %}
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="failed_start_time">Failed start time (s)</label>
-                <input type="number" id="failed_start_time" name="failed_start_time" min="1" required>
+                <input type="number" id="failed_start_time" name="failed_start_time" min="1" required value="{{ prefill_failed_start_time }}">
             </div>
 
             <button type="submit">Add result</button>
