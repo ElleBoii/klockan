@@ -1,2 +1,4 @@
 __pycache__/
-venv/ 
+venv/
+create_admin.py
+seed_db.py

@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -17,7 +18,7 @@ from models import (
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///klockan.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SECRET_KEY"] = "change-this-to-a-random-secret-key"
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-this-to-a-random-secret-key")
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=1)
 
 db.init_app(app)
