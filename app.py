@@ -16,7 +16,9 @@ from models import (
 )
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///klockan.db"
+db_path = os.path.join(app.instance_path, "klockan.db")
+os.makedirs(app.instance_path, exist_ok=True)
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-this-to-a-random-secret-key")
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=1)
