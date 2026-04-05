@@ -18,46 +18,36 @@
         {% endif %}
 
         {% if swimmers %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for swimmer in swimmers %}
-                        <tr>
-                            <td>{{ swimmer.name }}</td>
-                            <td>
+            <ul class="swimmer-manage-list">
+                {% for swimmer in swimmers %}
+                    <li class="swimmer-manage-item">
+                        <div class="swimmer-manage-header">
+                            <span class="swimmer-manage-name">{{ swimmer.name }}</span>
+                            {% if swimmer.is_active %}
+                                <span class="status-active">Active</span>
+                            {% else %}
+                                <span class="status-inactive">Inactive</span>
+                            {% endif %}
+                        </div>
+                        <div class="swimmer-manage-actions">
+                            <form method="POST" action="{{ url_for('toggle_swimmer_active') }}">
+                                <input type="hidden" name="swimmer_id" value="{{ swimmer.id }}">
                                 {% if swimmer.is_active %}
-                                    <span class="status-active">Active</span>
+                                    <button type="submit" class="deactivate-button">Deactivate</button>
                                 {% else %}
-                                    <span class="status-inactive">Inactive</span>
+                                    <button type="submit" class="activate-button">Activate</button>
                                 {% endif %}
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <form method="POST" action="{{ url_for('toggle_swimmer_active') }}" class="remove-form">
-                                        <input type="hidden" name="swimmer_id" value="{{ swimmer.id }}">
-                                        {% if swimmer.is_active %}
-                                            <button type="submit" class="deactivate-button">Deactivate</button>
-                                        {% else %}
-                                            <button type="submit" class="activate-button">Activate</button>
-                                        {% endif %}
-                                    </form>
-                                    <form method="POST" action="{{ url_for('rename_swimmer') }}" class="remove-form" style="display:flex; gap:6px;">
-                                        <input type="hidden" name="swimmer_id" value="{{ swimmer.id }}">
-                                        <input type="text" name="new_name" placeholder="{{ swimmer.name }}" required style="padding:6px 10px; font-size:0.9rem;">
-                                        <button type="submit" class="edit-button">Rename</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            </form>
+                            <form method="POST" action="{{ url_for('rename_swimmer') }}" class="rename-form">
+                                <input type="hidden" name="swimmer_id" value="{{ swimmer.id }}">
+                                <input type="text" name="new_name" placeholder="{{ swimmer.name }}" required>
+                                <button type="reset" class="secondary-button">✕</button>
+                                <button type="submit" class="edit-button">Rename</button>
+                            </form>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
         {% else %}
             <p>No swimmers found. <a href="{{ url_for('add_swimmers') }}">Add some swimmers</a> first.</p>
         {% endif %}

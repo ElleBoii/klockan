@@ -369,6 +369,56 @@ button:hover {
     color: #2e7d32;
 }
 
+.swimmer-manage-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.swimmer-manage-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    background: #fafafa;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.swimmer-manage-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.swimmer-manage-name {
+    font-weight: bold;
+    font-size: 1.05rem;
+    flex: 1;
+}
+
+.swimmer-manage-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.rename-form {
+    display: flex;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+}
+
+.rename-form input[type="text"] {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+}
+
 @media (max-width: 700px) {
     body {
         overflow-x: hidden;
