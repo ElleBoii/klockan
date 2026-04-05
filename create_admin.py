@@ -2,8 +2,8 @@ from werkzeug.security import generate_password_hash
 from app import app
 from models import db, User
 
-USERNAME = "YOUR_USERNAME"
-PASSWORD = "YOUR_PASSWORD"
+USERNAME = "admin123"
+PASSWORD = "KlockanAdmin123"
 
 with app.app_context():
     db.create_all()

@@ -1,4 +1,3 @@
 __pycache__/
 venv/
 seed_db.py
-create_admin.py
