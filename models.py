@@ -17,8 +17,8 @@ EQUIPMENT_OPTIONS = [
     "Paddlar & dolme",
     "Dolme",
     "Fenor & paddlar",
-    "Platta",
-    "Platta & fenor",
+    "Ben",
+    "Ben fenor",
     "Ingen"
 ]
 

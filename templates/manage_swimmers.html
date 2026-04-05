@@ -23,7 +23,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Status</th>
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -38,14 +38,21 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <form method="POST" action="{{ url_for('toggle_swimmer_active') }}" class="remove-form">
-                                    <input type="hidden" name="swimmer_id" value="{{ swimmer.id }}">
-                                    {% if swimmer.is_active %}
-                                        <button type="submit" class="deactivate-button">Deactivate</button>
-                                    {% else %}
-                                        <button type="submit" class="activate-button">Activate</button>
-                                    {% endif %}
-                                </form>
+                                <div class="action-buttons">
+                                    <form method="POST" action="{{ url_for('toggle_swimmer_active') }}" class="remove-form">
+                                        <input type="hidden" name="swimmer_id" value="{{ swimmer.id }}">
+                                        {% if swimmer.is_active %}
+                                            <button type="submit" class="deactivate-button">Deactivate</button>
+                                        {% else %}
+                                            <button type="submit" class="activate-button">Activate</button>
+                                        {% endif %}
+                                    </form>
+                                    <form method="POST" action="{{ url_for('rename_swimmer') }}" class="remove-form" style="display:flex; gap:6px;">
+                                        <input type="hidden" name="swimmer_id" value="{{ swimmer.id }}">
+                                        <input type="text" name="new_name" placeholder="{{ swimmer.name }}" required style="padding:6px 10px; font-size:0.9rem;">
+                                        <button type="submit" class="edit-button">Rename</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     {% endfor %}

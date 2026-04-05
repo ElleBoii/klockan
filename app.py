@@ -328,11 +328,14 @@ def add_klockan_round(round_number):
             })
     current_round_results.sort(key=lambda x: x["failed_start_time"], reverse=True)
 
+    already_added_ids = {r["swimmer_id"] for r in current_round_results}
+    available_swimmers = [s for s in swimmers if s.id not in already_added_ids]
+
     return render_template(
         "add_klockan_round.html",
         round_number=round_number,
         max_rounds=max_rounds,
-        swimmers=swimmers,
+        swimmers=available_swimmers,
         strokes=STROKES,
         equipment_options=EQUIPMENT_OPTIONS,
         session_info=pending,
@@ -387,7 +390,7 @@ def add_klockan_round_result(round_number):
     })
     save_pending_klockan(pending)
 
-    return redirect(url_for("add_klockan_round", round_number=round_number))
+    return redirect(url_for("add_klockan_round", round_number=round_number, stroke=stroke, equipment=equipment))
 
 
 @app.route("/add-klockan-round/<int:round_number>/remove", methods=["POST"])
@@ -466,6 +469,36 @@ def manage_swimmers():
     swimmers = Swimmer.query.order_by(Swimmer.name).all()
     message = session.pop("manage_swimmer_message", "")
     return render_template("manage_swimmers.html", swimmers=swimmers, message=message)
+
+
+@app.route("/manage-swimmers/rename", methods=["POST"])
+@login_required
+def rename_swimmer():
+    swimmer_id = request.form.get("swimmer_id", "").strip()
+    new_name = request.form.get("new_name", "").strip()
+
+    try:
+        swimmer_id = int(swimmer_id)
+    except ValueError:
+        return redirect(url_for("manage_swimmers"))
+
+    if not new_name:
+        session["manage_swimmer_message"] = "Name cannot be empty."
+        return redirect(url_for("manage_swimmers"))
+
+    existing = Swimmer.query.filter_by(name=new_name).first()
+    if existing and existing.id != swimmer_id:
+        session["manage_swimmer_message"] = f'"{new_name}" already exists.'
+        return redirect(url_for("manage_swimmers"))
+
+    swimmer = Swimmer.query.get(swimmer_id)
+    if swimmer:
+        old_name = swimmer.name
+        swimmer.name = new_name
+        db.session.commit()
+        session["manage_swimmer_message"] = f'"{old_name}" renamed to "{new_name}".'
+
+    return redirect(url_for("manage_swimmers"))
 
 
 @app.route("/manage-swimmers/toggle", methods=["POST"])
