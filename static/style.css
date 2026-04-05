@@ -370,11 +370,17 @@ button:hover {
 }
 
 @media (max-width: 700px) {
+    body {
+        overflow-x: hidden;
+    }
+
     .container {
         margin: 0;
         padding: 20px 16px;
         border-radius: 0;
         box-shadow: none;
+        box-sizing: border-box;
+        width: 100%;
     }
 
     .filter-dropdowns {
@@ -386,9 +392,12 @@ button:hover {
         gap: 12px;
     }
 
-    table {
-        display: block;
+    .table-wrapper {
         overflow-x: auto;
+        width: 100%;
+    }
+
+    table {
         white-space: nowrap;
     }
 
