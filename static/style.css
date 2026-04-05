@@ -368,3 +368,43 @@ button:hover {
 .success-message {
     color: #2e7d32;
 }
+
+@media (max-width: 700px) {
+    .container {
+        margin: 0;
+        padding: 20px 16px;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .filter-dropdowns {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .filter-actions {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .simple-form {
+        max-width: 100%;
+    }
+
+    .action-buttons {
+        flex-wrap: wrap;
+    }
+
+    .round-actions {
+        justify-content: stretch;
+    }
+
+    .round-actions button {
+        width: 100%;
+    }
+}
