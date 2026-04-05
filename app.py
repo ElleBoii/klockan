@@ -408,12 +408,20 @@ def remove_klockan_round_result(round_number):
     except ValueError:
         return redirect(url_for("add_klockan_round", round_number=round_number))
 
+    removed = next(
+        (r for r in pending["results"] if r["round_number"] == round_number and r["swimmer_id"] == swimmer_id),
+        None
+    )
+
     pending["results"] = [
         result for result in pending["results"]
         if not (result["round_number"] == round_number and result["swimmer_id"] == swimmer_id)
     ]
 
     save_pending_klockan(pending)
+
+    if removed:
+        return redirect(url_for("add_klockan_round", round_number=round_number, stroke=removed["stroke"], equipment=removed["equipment"]))
     return redirect(url_for("add_klockan_round", round_number=round_number))
 
 
