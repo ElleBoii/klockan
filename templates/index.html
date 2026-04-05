@@ -115,32 +115,6 @@
                                 equipment=selected_equipment,
                                 pool_length=selected_pool_length,
                                 show_only_active=1 if show_only_active else 0,
-                                sort_by='date',
-                                sort_order='desc' if sort_by == 'date' and sort_order == 'asc' else 'asc') }}">
-                                Date
-                            </a>
-                        </th>
-                        <th>
-                            <a href="{{ url_for('index',
-                                filter_applied=1,
-                                swimmer=selected_swimmer,
-                                stroke=selected_stroke,
-                                equipment=selected_equipment,
-                                pool_length=selected_pool_length,
-                                show_only_active=1 if show_only_active else 0,
-                                sort_by='pool_length',
-                                sort_order='desc' if sort_by == 'pool_length' and sort_order == 'asc' else 'asc') }}">
-                                Pool length
-                            </a>
-                        </th>
-                        <th>
-                            <a href="{{ url_for('index',
-                                filter_applied=1,
-                                swimmer=selected_swimmer,
-                                stroke=selected_stroke,
-                                equipment=selected_equipment,
-                                pool_length=selected_pool_length,
-                                show_only_active=1 if show_only_active else 0,
                                 sort_by='equipment',
                                 sort_order='desc' if sort_by == 'equipment' and sort_order == 'asc' else 'asc') }}">
                                 Equipment
@@ -156,7 +130,33 @@
                                 show_only_active=1 if show_only_active else 0,
                                 sort_by='result',
                                 sort_order='desc' if sort_by == 'result' and sort_order == 'asc' else 'asc') }}">
-                                Failed start time (s)
+                                Result (s)
+                            </a>
+                        </th>
+                        <th>
+                            <a href="{{ url_for('index',
+                                filter_applied=1,
+                                swimmer=selected_swimmer,
+                                stroke=selected_stroke,
+                                equipment=selected_equipment,
+                                pool_length=selected_pool_length,
+                                show_only_active=1 if show_only_active else 0,
+                                sort_by='date',
+                                sort_order='desc' if sort_by == 'date' and sort_order == 'asc' else 'asc') }}">
+                                Date
+                            </a>
+                        </th>
+                        <th>
+                            <a href="{{ url_for('index',
+                                filter_applied=1,
+                                swimmer=selected_swimmer,
+                                stroke=selected_stroke,
+                                equipment=selected_equipment,
+                                pool_length=selected_pool_length,
+                                show_only_active=1 if show_only_active else 0,
+                                sort_by='pool_length',
+                                sort_order='desc' if sort_by == 'pool_length' and sort_order == 'asc' else 'asc') }}">
+                                Pool
                             </a>
                         </th>
                     </tr>
@@ -166,10 +166,10 @@
                         <tr>
                             <td>{{ result.swimmer.name }}</td>
                             <td>{{ result.stroke }}</td>
-                            <td>{{ result.session.date }}</td>
-                            <td>{{ result.session.pool_length }}</td>
                             <td>{{ result.equipment }}</td>
                             <td>{{ result.failed_start_time }}</td>
+                            <td>{{ result.session.date }}</td>
+                            <td>{{ result.session.pool_length }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
