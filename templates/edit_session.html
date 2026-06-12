@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit session</title>
+    <title>Redigera session</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Edit session</h1>
+        <h1>Redigera session</h1>
 
-        <p><a href="{{ url_for('manage_sessions') }}">Back to manage sessions</a></p>
+        <a href="{{ url_for('manage_sessions') }}" class="back-box">Tillbaka</a>
 
         {% if message %}
             <p class="message success-message">{{ message }}</p>
@@ -19,38 +19,46 @@
             <p class="message">{{ error }}</p>
         {% endif %}
 
-        <h2>Session info</h2>
-        <form method="POST" action="{{ url_for('save_session_info', session_id=klockan_session.id) }}" class="simple-form">
+        <h2>Sessionsinformation</h2>
+        <form method="POST" action="{{ url_for('save_session_info', session_id=klockan_session.id) }}" class="simple-form" id="edit-info-form">
             <div class="form-group">
-                <label for="date">Date</label>
-                <input type="date" id="date" name="date" value="{{ klockan_session.date }}" required>
+                <label>Datum</label>
+                <div class="date-fields">
+                    <input type="text" id="edit_year" inputmode="numeric" placeholder="ÅÅÅÅ" maxlength="4" class="date-part year-part" autocomplete="off" value="{{ klockan_session.date[:4] }}">
+                    <span class="date-sep">-</span>
+                    <input type="text" id="edit_month" inputmode="numeric" placeholder="MM" maxlength="2" class="date-part" autocomplete="off" value="{{ klockan_session.date[5:7] }}">
+                    <span class="date-sep">-</span>
+                    <input type="text" id="edit_day" inputmode="numeric" placeholder="DD" maxlength="2" class="date-part" autocomplete="off" value="{{ klockan_session.date[8:10] }}">
+                    <input type="hidden" id="edit_date" name="date" value="{{ klockan_session.date }}">
+                </div>
+                <p id="edit-date-error" class="message" style="display:none; margin-top:6px;"></p>
             </div>
             <div class="form-group">
-                <label for="pool_length">Pool length</label>
+                <label for="pool_length">Bassänglängd</label>
                 <select id="pool_length" name="pool_length" required>
                     {% for length in pool_lengths %}
                         <option value="{{ length }}" {% if length == klockan_session.pool_length %}selected{% endif %}>
-                            {{ length }}
+                            {{ pool_length_labels.get(length, length) }}
                         </option>
                     {% endfor %}
                 </select>
             </div>
             <div>
-                <button type="submit">Save changes</button>
+                <button type="submit">Spara ändringar</button>
             </div>
         </form>
 
-        <h2>Results</h2>
+        <h2>Resultat</h2>
 
         {% for round_number, results in results_by_round.items() %}
-            <h3>Round {{ round_number }}</h3>
+            <h3>Omgång {{ round_number }}</h3>
             {% if results %}
                 <ul class="name-list">
                     {% for result in results %}
                         <li class="name-list-item">
                             <span>
                                 {{ result.swimmer.name }} —
-                                {{ result.stroke }} —
+                                {{ stroke_labels.get(result.stroke, result.stroke) }} —
                                 {{ result.equipment }} —
                                 {{ result.failed_start_time }} s
                             </span>
@@ -62,56 +70,127 @@
                     {% endfor %}
                 </ul>
             {% else %}
-                <p class="empty-round">No results for this round.</p>
+                <p class="empty-round">Inga resultat för denna omgång.</p>
             {% endif %}
         {% endfor %}
 
-        <h2>Add a result</h2>
+        <h2>Lägg till ett resultat</h2>
         <form method="POST" action="{{ url_for('add_session_result', session_id=klockan_session.id) }}" class="simple-form">
             <div class="form-group">
-                <label for="round_number">Round</label>
+                <label for="round_number">Omgång</label>
                 <select id="round_number" name="round_number" required>
-                    <option value="">Select round</option>
+                    <option value="">Välj omgång</option>
                     {% for i in range(1, klockan_session.max_rounds + 1) %}
-                        <option value="{{ i }}">Round {{ i }}</option>
+                        <option value="{{ i }}">Omgång {{ i }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="form-group">
-                <label for="swimmer_id">Swimmer</label>
+                <label for="swimmer_id">Simmare</label>
                 <select id="swimmer_id" name="swimmer_id" required>
-                    <option value="">Select swimmer</option>
+                    <option value="">Välj simmare</option>
                     {% for swimmer in swimmers %}
                         <option value="{{ swimmer.id }}">{{ swimmer.name }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="form-group">
-                <label for="stroke">Stroke</label>
+                <label for="stroke">Simsätt</label>
                 <select id="stroke" name="stroke" required>
-                    <option value="">Select stroke</option>
+                    <option value="">Välj simsätt</option>
                     {% for stroke in strokes %}
-                        <option value="{{ stroke }}">{{ stroke }}</option>
+                        <option value="{{ stroke }}">{{ stroke_labels.get(stroke, stroke) }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="form-group">
-                <label for="equipment">Equipment</label>
+                <label for="equipment">Utrustning</label>
                 <select id="equipment" name="equipment" required>
-                    <option value="">Select equipment</option>
+                    <option value="">Välj utrustning</option>
                     {% for equipment in equipment_options %}
                         <option value="{{ equipment }}">{{ equipment }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="form-group">
-                <label for="failed_start_time">Failed start time (s)</label>
+                <label for="failed_start_time">Missad starttid (s)</label>
                 <input type="number" id="failed_start_time" name="failed_start_time" min="1" required>
             </div>
             <div>
-                <button type="submit">Add result</button>
+                <button type="submit">Lägg till resultat</button>
             </div>
         </form>
     </div>
+    <script>
+    (function() {
+        var yearInput  = document.getElementById('edit_year');
+        var monthInput = document.getElementById('edit_month');
+        var dayInput   = document.getElementById('edit_day');
+        var hiddenDate = document.getElementById('edit_date');
+        var dateError  = document.getElementById('edit-date-error');
+        var form       = document.getElementById('edit-info-form');
+
+        function digitsOnly(inp) {
+            inp.addEventListener('keypress', function(e) {
+                if (!/\d/.test(e.key) && !e.ctrlKey && !e.metaKey) e.preventDefault();
+            });
+        }
+        digitsOnly(yearInput);
+        digitsOnly(monthInput);
+        digitsOnly(dayInput);
+
+        yearInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 4);
+            if (this.value.length === 4) monthInput.focus();
+        });
+
+        monthInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 2);
+            if (this.value.length === 2) dayInput.focus();
+        });
+
+        dayInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 2);
+        });
+
+        form.addEventListener('submit', function(e) {
+            dateError.style.display = 'none';
+
+            var y  = yearInput.value.trim();
+            var mo = monthInput.value.trim();
+            var d  = dayInput.value.trim();
+
+            if (!y || !mo || !d) {
+                e.preventDefault();
+                dateError.textContent = 'Fyll i ett datum.';
+                dateError.style.display = 'block';
+                return;
+            }
+
+            if (y.length !== 4) {
+                e.preventDefault();
+                dateError.textContent = 'Ange ett giltigt år med fyra siffror.';
+                dateError.style.display = 'block';
+                return;
+            }
+
+            var year  = parseInt(y, 10);
+            var month = parseInt(mo, 10);
+            var day   = parseInt(d, 10);
+
+            var dateObj = new Date(year, month - 1, day);
+            if (dateObj.getFullYear() !== year || dateObj.getMonth() !== month - 1 || dateObj.getDate() !== day) {
+                e.preventDefault();
+                dateError.textContent = 'Datumet finns inte. Kontrollera och försök igen.';
+                dateError.style.display = 'block';
+                return;
+            }
+
+            var mm = String(month).padStart(2, '0');
+            var dd = String(day).padStart(2, '0');
+            hiddenDate.value = y + '-' + mm + '-' + dd;
+        });
+    })();
+    </script>
 </body>
 </html>

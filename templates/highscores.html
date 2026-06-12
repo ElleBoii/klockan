@@ -61,7 +61,7 @@
             <tr>
                 <th>#</th>
                 <th>Namn</th>
-                <th>Resultat (s)</th>
+                <th>Resultat</th>
                 <th>Simsätt</th>
                 <th>Utrustning</th>
                 <th>Datum</th>
@@ -70,7 +70,7 @@
         </thead>
         <tbody>
             {% for result in top_results %}
-            <tr>
+            <tr {% if loop.index == 1 %}class="medal-gold"{% elif loop.index == 2 %}class="medal-silver"{% elif loop.index == 3 %}class="medal-bronze"{% endif %}>
                 <td>{{ loop.index }}</td>
                 <td>{{ result.swimmer.name }}</td>
                 <td>{{ result.failed_start_time }}</td>

@@ -1,34 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirm delete session</title>
+    <title>Ta bort session</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Delete session?</h1>
-        <p class="page-subtitle">This will permanently delete the session and all its results.</p>
+        <h1>Ta bort session?</h1>
+        <p class="page-subtitle">Detta tar permanent bort sessionen och alla dess resultat.</p>
 
-        <p><a href="{{ url_for('manage_sessions') }}">Back to manage sessions</a></p>
+        <a href="{{ url_for('manage_sessions') }}" class="back-box">Tillbaka</a>
 
         <div class="session-info-box">
-            <strong>Date:</strong> {{ klockan_session.date }}<br>
-            <strong>Pool length:</strong> {{ klockan_session.pool_length }}<br>
-            <strong>Rounds:</strong> {{ klockan_session.max_rounds }}<br>
-            <strong>Total results:</strong> {{ klockan_session.results | length }}
+            <strong>Datum:</strong> {{ klockan_session.date }}<br>
+            <strong>Bassänglängd:</strong> {{ pool_length_labels.get(klockan_session.pool_length, klockan_session.pool_length) }}<br>
+            <strong>Omgångar:</strong> {{ klockan_session.max_rounds }}<br>
+            <strong>Totalt antal resultat:</strong> {{ klockan_session.results | length }}
         </div>
 
         {% for round_number, results in results_by_round.items() %}
-            <h2>Round {{ round_number }}</h2>
+            <h2>Omgång {{ round_number }}</h2>
             {% if results %}
                 <ul class="name-list">
                     {% for result in results %}
                         <li class="name-list-item">
                             <span>
                                 {{ result.swimmer.name }} —
-                                {{ result.stroke }} —
+                                {{ stroke_labels.get(result.stroke, result.stroke) }} —
                                 {{ result.equipment }} —
                                 {{ result.failed_start_time }} s
                             </span>
@@ -36,16 +36,16 @@
                     {% endfor %}
                 </ul>
             {% else %}
-                <p>No results for this round.</p>
+                <p>Inga resultat för denna omgång.</p>
             {% endif %}
         {% endfor %}
 
         <div class="button-row">
             <form method="POST" action="{{ url_for('delete_session') }}">
                 <input type="hidden" name="session_id" value="{{ klockan_session.id }}">
-                <button type="submit" class="deactivate-button">Yes, delete everything</button>
+                <button type="submit" class="deactivate-button">Ja, ta bort allt</button>
             </form>
-            <a class="secondary-button" href="{{ url_for('manage_sessions') }}">Cancel</a>
+            <a class="secondary-button" href="{{ url_for('manage_sessions') }}">Avbryt</a>
         </div>
     </div>
 </body>

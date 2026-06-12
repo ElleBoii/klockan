@@ -127,7 +127,7 @@
                             open_session=group.session.id,
                             sort_by='result',
                             sort_order='asc' if sort_by == 'result' and sort_order == 'desc' else 'desc') }}">
-                            Resultat (s){% if sort_by == 'result' %} {{ '↑' if sort_order == 'asc' else '↓' }}{% endif %}
+                            Resultat{% if sort_by == 'result' %} {{ '↑' if sort_order == 'asc' else '↓' }}{% endif %}
                         </a>
                     </th>
                 </tr>

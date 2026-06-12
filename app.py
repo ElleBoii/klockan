@@ -1,5 +1,5 @@
 import os
-from datetime import timedelta
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -35,6 +35,14 @@ login_manager.login_view = "login"
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+@app.context_processor
+def inject_labels():
+    return {
+        "stroke_labels": STROKE_LABELS,
+        "pool_length_labels": POOL_LENGTH_LABELS,
+    }
 
 def pool_length_sort_value(pool_length):
     order = {
@@ -303,15 +311,15 @@ def save_confirmed_swimmers():
 
     if added_names and skipped_names:
         session["swimmer_message"] = (
-            f"Added: {', '.join(added_names)}. "
-            f"Skipped existing: {', '.join(skipped_names)}."
+            f"Lade till: {', '.join(added_names)}. "
+            f"Hoppade över befintliga: {', '.join(skipped_names)}."
         )
     elif added_names:
-        session["swimmer_message"] = f"Added: {', '.join(added_names)}."
+        session["swimmer_message"] = f"Lade till: {', '.join(added_names)}."
     else:
-        session["swimmer_message"] = "No swimmers were added because they already exist."
+        session["swimmer_message"] = "Inga simmare lades till eftersom de redan finns."
 
-    return redirect(url_for("index"))
+    return redirect(url_for("manage_hub"))
 
 
 @app.route("/add-klockan-session", methods=["GET", "POST"])
@@ -325,15 +333,21 @@ def add_klockan_session():
         max_rounds = request.form.get("max_rounds", "").strip()
 
         if not date or not pool_length or not max_rounds:
-            message = "Please fill in all fields."
+            message = "Fyll i alla fält."
         else:
             try:
                 max_rounds = int(max_rounds)
             except ValueError:
-                message = "Max rounds must be an integer."
+                message = "Max omgångar måste vara ett heltal."
 
             if not message and max_rounds not in [1, 2, 3, 4]:
-                message = "Max rounds must be between 1 and 4."
+                message = "Max omgångar måste vara mellan 1 och 4."
+
+            if not message:
+                try:
+                    datetime.strptime(date, "%Y-%m-%d")
+                except ValueError:
+                    message = "Datumet finns inte. Kontrollera och försök igen."
 
             if not message:
                 pending = {
@@ -423,14 +437,14 @@ def add_klockan_round_result(round_number):
     failed_start_time = request.form.get("failed_start_time", "").strip()
 
     if not swimmer_id or not stroke or not equipment or not failed_start_time:
-        session["klockan_message"] = "Please fill in all fields."
+        session["klockan_message"] = "Fyll i alla fält."
         return redirect(url_for("add_klockan_round", round_number=round_number))
 
     try:
         swimmer_id = int(swimmer_id)
         failed_start_time = int(failed_start_time)
     except ValueError:
-        session["klockan_message"] = "Failed start time must be an integer."
+        session["klockan_message"] = "Missad starttid måste vara ett heltal."
         return redirect(url_for("add_klockan_round", round_number=round_number))
 
     round_results = [
@@ -439,7 +453,7 @@ def add_klockan_round_result(round_number):
     ]
 
     if any(result["swimmer_id"] == swimmer_id for result in round_results):
-        session["klockan_message"] = "That swimmer has already been added in this round."
+        session["klockan_message"] = "Simmarens har redan lagts till i denna omgång."
         return redirect(url_for("add_klockan_round", round_number=round_number))
 
     pending["results"].append({
@@ -552,12 +566,12 @@ def rename_swimmer():
         return redirect(url_for("manage_swimmers"))
 
     if not new_name:
-        session["manage_swimmer_message"] = "Name cannot be empty."
+        session["manage_swimmer_message"] = "Namnet får inte vara tomt."
         return redirect(url_for("manage_swimmers"))
 
     existing = Swimmer.query.filter_by(name=new_name).first()
     if existing and existing.id != swimmer_id:
-        session["manage_swimmer_message"] = f'"{new_name}" already exists.'
+        session["manage_swimmer_message"] = f'"{new_name}" finns redan.'
         return redirect(url_for("manage_swimmers"))
 
     swimmer = Swimmer.query.get(swimmer_id)
@@ -565,7 +579,7 @@ def rename_swimmer():
         old_name = swimmer.name
         swimmer.name = new_name
         db.session.commit()
-        session["manage_swimmer_message"] = f'"{old_name}" renamed to "{new_name}".'
+        session["manage_swimmer_message"] = f'"{old_name}" bytte namn till "{new_name}".'
 
     return redirect(url_for("manage_swimmers"))
 
@@ -584,8 +598,8 @@ def toggle_swimmer_active():
     if swimmer:
         swimmer.is_active = not swimmer.is_active
         db.session.commit()
-        status = "active" if swimmer.is_active else "inactive"
-        session["manage_swimmer_message"] = f'"{swimmer.name}" is now {status}.'
+        status = "aktiv" if swimmer.is_active else "inaktiv"
+        session["manage_swimmer_message"] = f'"{swimmer.name}" är nu {status}.'
 
     return redirect(url_for("manage_swimmers"))
 
@@ -633,7 +647,7 @@ def delete_session():
         label = f"{klockan_session.date} — {klockan_session.pool_length}"
         db.session.delete(klockan_session)
         db.session.commit()
-        session["manage_session_message"] = f'Session "{label}" and all its results have been deleted.'
+        session["manage_session_message"] = f'Session "{label}" och alla dess resultat har tagits bort.'
 
     return redirect(url_for("manage_sessions"))
 
@@ -679,13 +693,19 @@ def save_session_info(session_id):
     pool_length = request.form.get("pool_length", "").strip()
 
     if not date or not pool_length:
-        session["edit_session_error"] = "Please fill in all fields."
+        session["edit_session_error"] = "Fyll i alla fält."
+        return redirect(url_for("edit_session", session_id=session_id))
+
+    try:
+        datetime.strptime(date, "%Y-%m-%d")
+    except ValueError:
+        session["edit_session_error"] = "Datumet finns inte. Kontrollera och försök igen."
         return redirect(url_for("edit_session", session_id=session_id))
 
     klockan_session.date = date
     klockan_session.pool_length = pool_length
     db.session.commit()
-    session["edit_session_message"] = "Session info updated."
+    session["edit_session_message"] = "Sessionsinformation sparad."
     return redirect(url_for("edit_session", session_id=session_id))
 
 
@@ -703,7 +723,7 @@ def delete_session_result(session_id):
     if result and result.session_id == session_id:
         db.session.delete(result)
         db.session.commit()
-        session["edit_session_message"] = "Result deleted."
+        session["edit_session_message"] = "Resultat borttaget."
 
     return redirect(url_for("edit_session", session_id=session_id))
 
@@ -722,7 +742,7 @@ def add_session_result(session_id):
     failed_start_time = request.form.get("failed_start_time", "").strip()
 
     if not swimmer_id or not round_number or not stroke or not equipment or not failed_start_time:
-        session["edit_session_error"] = "Please fill in all fields."
+        session["edit_session_error"] = "Fyll i alla fält."
         return redirect(url_for("edit_session", session_id=session_id))
 
     try:
@@ -730,11 +750,11 @@ def add_session_result(session_id):
         round_number = int(round_number)
         failed_start_time = int(failed_start_time)
     except ValueError:
-        session["edit_session_error"] = "Invalid input."
+        session["edit_session_error"] = "Ogiltigt värde."
         return redirect(url_for("edit_session", session_id=session_id))
 
     if round_number < 1 or round_number > klockan_session.max_rounds:
-        session["edit_session_error"] = f"Round must be between 1 and {klockan_session.max_rounds}."
+        session["edit_session_error"] = f"Omgången måste vara mellan 1 och {klockan_session.max_rounds}."
         return redirect(url_for("edit_session", session_id=session_id))
 
     existing = KlockanResult.query.filter_by(
@@ -743,7 +763,7 @@ def add_session_result(session_id):
         swimmer_id=swimmer_id
     ).first()
     if existing:
-        session["edit_session_error"] = "That swimmer already has a result in that round."
+        session["edit_session_error"] = "Simmarens har redan ett resultat i den omgången."
         return redirect(url_for("edit_session", session_id=session_id))
 
     db.session.add(KlockanResult(
@@ -755,7 +775,7 @@ def add_session_result(session_id):
         failed_start_time=failed_start_time
     ))
     db.session.commit()
-    session["edit_session_message"] = "Result added."
+    session["edit_session_message"] = "Resultat lagt till."
     return redirect(url_for("edit_session", session_id=session_id))
 
 
@@ -787,7 +807,7 @@ def save_klockan_session():
 
     db.session.commit()
     clear_pending_klockan()
-    return redirect(url_for("index"))
+    return redirect(url_for("manage_hub"))
 
 
 with app.app_context():

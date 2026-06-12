@@ -1,41 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Klockan session</title>
+    <title>Lägg till session</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Add Klockan session</h1>
+        <h1>Lägg till session</h1>
 
-        <p><a href="{{ url_for('index') }}">Back to results</a></p>
+        <a href="{{ url_for('manage_hub') }}" class="back-box">Tillbaka</a>
 
         {% if message %}
             <p class="message">{{ message }}</p>
         {% endif %}
 
-        <form method="POST" class="simple-form">
+        <form method="POST" class="simple-form" id="session-form">
             <div class="form-group">
-                <label for="date">Date</label>
-                <input type="date" id="date" name="date" required autofocus>
+                <label>Datum</label>
+                <div class="date-fields">
+                    <input type="text" id="date_year" inputmode="numeric" placeholder="ÅÅÅÅ" maxlength="4" class="date-part year-part" autocomplete="off" autofocus>
+                    <span class="date-sep">-</span>
+                    <input type="text" id="date_month" inputmode="numeric" placeholder="MM" maxlength="2" class="date-part" autocomplete="off">
+                    <span class="date-sep">-</span>
+                    <input type="text" id="date_day" inputmode="numeric" placeholder="DD" maxlength="2" class="date-part" autocomplete="off">
+                    <input type="hidden" id="date" name="date">
+                </div>
+                <p id="date-error" class="message" style="display:none; margin-top:6px;"></p>
             </div>
 
             <div class="form-group">
-                <label for="pool_length">Pool length</label>
+                <label for="pool_length">Bassänglängd</label>
                 <select id="pool_length" name="pool_length" required>
-                    <option value="">Select pool length</option>
+                    <option value="">Välj bassänglängd</option>
                     {% for length in pool_lengths %}
-                        <option value="{{ length }}">{{ length }}</option>
+                        <option value="{{ length }}">{{ pool_length_labels.get(length, length) }}</option>
                     {% endfor %}
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="max_rounds">Max rounds</label>
+                <label for="max_rounds">Max omgångar</label>
                 <select id="max_rounds" name="max_rounds" required>
-                    <option value="">Select max rounds</option>
+                    <option value="">Välj max omgångar</option>
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
@@ -43,8 +51,79 @@
                 </select>
             </div>
 
-            <button type="submit">Next</button>
+            <button type="submit">Nästa</button>
         </form>
     </div>
+    <script>
+    (function() {
+        var yearInput  = document.getElementById('date_year');
+        var monthInput = document.getElementById('date_month');
+        var dayInput   = document.getElementById('date_day');
+        var hiddenDate = document.getElementById('date');
+        var dateError  = document.getElementById('date-error');
+        var form       = document.getElementById('session-form');
+
+        function digitsOnly(inp) {
+            inp.addEventListener('keypress', function(e) {
+                if (!/\d/.test(e.key) && !e.ctrlKey && !e.metaKey) e.preventDefault();
+            });
+        }
+        digitsOnly(yearInput);
+        digitsOnly(monthInput);
+        digitsOnly(dayInput);
+
+        yearInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 4);
+            if (this.value.length === 4) monthInput.focus();
+        });
+
+        monthInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 2);
+            if (this.value.length === 2) dayInput.focus();
+        });
+
+        dayInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 2);
+        });
+
+        form.addEventListener('submit', function(e) {
+            dateError.style.display = 'none';
+
+            var y  = yearInput.value.trim();
+            var mo = monthInput.value.trim();
+            var d  = dayInput.value.trim();
+
+            if (!y || !mo || !d) {
+                e.preventDefault();
+                dateError.textContent = 'Fyll i ett datum.';
+                dateError.style.display = 'block';
+                return;
+            }
+
+            if (y.length !== 4) {
+                e.preventDefault();
+                dateError.textContent = 'Ange ett giltigt år med fyra siffror.';
+                dateError.style.display = 'block';
+                return;
+            }
+
+            var year  = parseInt(y, 10);
+            var month = parseInt(mo, 10);
+            var day   = parseInt(d, 10);
+
+            var dateObj = new Date(year, month - 1, day);
+            if (dateObj.getFullYear() !== year || dateObj.getMonth() !== month - 1 || dateObj.getDate() !== day) {
+                e.preventDefault();
+                dateError.textContent = 'Datumet finns inte. Kontrollera och försök igen.';
+                dateError.style.display = 'block';
+                return;
+            }
+
+            var mm = String(month).padStart(2, '0');
+            var dd = String(day).padStart(2, '0');
+            hiddenDate.value = y + '-' + mm + '-' + dd;
+        });
+    })();
+    </script>
 </body>
 </html>

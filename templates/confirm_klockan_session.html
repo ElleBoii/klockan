@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirm Klockan session</title>
+    <title>Bekräfta Klockan-session</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Confirm Klockan session</h1>
+        <h1>Bekräfta Klockan-session</h1>
 
-        <p>
-            <strong>Date:</strong> {{ session_info.date }}<br>
-            <strong>Pool length:</strong> {{ session_info.pool_length }}<br>
-            <strong>Max rounds:</strong> {{ session_info.max_rounds }}
-        </p>
+        <div class="session-info-box">
+            <strong>Datum:</strong> {{ session_info.date }}<br>
+            <strong>Bassänglängd:</strong> {{ pool_length_labels.get(session_info.pool_length, session_info.pool_length) }}<br>
+            <strong>Max omgångar:</strong> {{ session_info.max_rounds }}
+        </div>
 
         {% for round_number, round_results in results_by_round.items() %}
-            <h2>Round {{ round_number }}</h2>
+            <h2>Omgång {{ round_number }}</h2>
 
             {% if round_results %}
                 <ul class="name-list">
@@ -25,7 +25,7 @@
                         <li class="name-list-item">
                             <span>
                                 {{ result.swimmer_name }} —
-                                {{ result.stroke }} —
+                                {{ stroke_labels.get(result.stroke, result.stroke) }} —
                                 {{ result.equipment }} —
                                 {{ result.failed_start_time }} s
                             </span>
@@ -33,15 +33,15 @@
                     {% endfor %}
                 </ul>
             {% else %}
-                <p>No results entered for this round.</p>
+                <p>Inga resultat angivna för denna omgång.</p>
             {% endif %}
         {% endfor %}
 
         <div class="button-row">
-            <a class="secondary-button" href="{{ url_for('add_klockan_round', round_number=session_info.max_rounds) }}">Back</a>
+            <a class="secondary-button" href="{{ url_for('add_klockan_round', round_number=session_info.max_rounds) }}">Tillbaka</a>
 
             <form method="POST" action="{{ url_for('save_klockan_session') }}">
-                <button type="submit">Confirm and save</button>
+                <button type="submit">Bekräfta och spara</button>
             </form>
         </div>
     </div>

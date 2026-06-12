@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage swimmers</title>
+    <title>Hantera simmare</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Manage swimmers</h1>
-        <p class="page-subtitle">Toggle whether a swimmer is active or inactive. You can also rename a swimmer here.</p>
+        <h1>Hantera simmare</h1>
+        <p class="page-subtitle">Aktivera/avaktivera simmare eller byt namn.</p>
 
-        <p><a href="{{ url_for('index') }}">Back to results</a></p>
+        <a href="{{ url_for('manage_hub') }}" class="back-box">Tillbaka</a>
 
         {% if message %}
             <p class="message success-message">{{ message }}</p>
@@ -24,33 +24,51 @@
                         <div class="swimmer-manage-header">
                             <span class="swimmer-manage-name">{{ swimmer.name }}</span>
                             {% if swimmer.is_active %}
-                                <span class="status-active">Active</span>
+                                <span class="status-active">Aktiv</span>
                             {% else %}
-                                <span class="status-inactive">Inactive</span>
+                                <span class="status-inactive">Inaktiv</span>
                             {% endif %}
                         </div>
                         <div class="swimmer-manage-actions">
                             <form method="POST" action="{{ url_for('toggle_swimmer_active') }}">
                                 <input type="hidden" name="swimmer_id" value="{{ swimmer.id }}">
                                 {% if swimmer.is_active %}
-                                    <button type="submit" class="deactivate-button">Deactivate</button>
+                                    <button type="submit" class="deactivate-button">Avaktivera</button>
                                 {% else %}
-                                    <button type="submit" class="activate-button">Activate</button>
+                                    <button type="submit" class="activate-button">Aktivera</button>
                                 {% endif %}
                             </form>
-                            <form method="POST" action="{{ url_for('rename_swimmer') }}" class="rename-form">
+                            <form method="POST" action="{{ url_for('rename_swimmer') }}" class="rename-form" id="rename-form-{{ swimmer.id }}">
                                 <input type="hidden" name="swimmer_id" value="{{ swimmer.id }}">
-                                <input type="text" name="new_name" placeholder="{{ swimmer.name }}" required>
-                                <button type="reset" class="secondary-button">✕</button>
-                                <button type="submit" class="edit-button">Rename</button>
+                                <input type="text" name="new_name" value="{{ swimmer.name }}" required
+                                       id="new-name-{{ swimmer.id }}" data-current-name="{{ swimmer.name }}">
+                                <button type="button" class="edit-button" onclick="showRenameConfirm({{ swimmer.id }})">Byt namn</button>
                             </form>
+                        </div>
+                        <div id="rename-confirm-{{ swimmer.id }}" class="rename-confirm-row" style="display:none;">
+                            <span>Byta namn till "<span id="rename-new-name-{{ swimmer.id }}"></span>"?</span>
+                            <button type="submit" form="rename-form-{{ swimmer.id }}" class="edit-button">Ja</button>
+                            <button type="button" class="btn-cancel" onclick="hideRenameConfirm({{ swimmer.id }})">Avbryt</button>
                         </div>
                     </li>
                 {% endfor %}
             </ul>
         {% else %}
-            <p>No swimmers found. <a href="{{ url_for('add_swimmers') }}">Add some swimmers</a> first.</p>
+            <p>Inga simmare hittades. <a href="{{ url_for('add_swimmers') }}">Lägg till simmare</a> först.</p>
         {% endif %}
     </div>
+    <script>
+    function showRenameConfirm(id) {
+        var input = document.getElementById('new-name-' + id);
+        var newName = input.value.trim();
+        if (!newName || newName === input.dataset.currentName) return;
+        document.getElementById('rename-new-name-' + id).textContent = newName;
+        document.getElementById('rename-confirm-' + id).style.display = 'flex';
+    }
+
+    function hideRenameConfirm(id) {
+        document.getElementById('rename-confirm-' + id).style.display = 'none';
+    }
+    </script>
 </body>
 </html>

@@ -3,16 +3,23 @@
 
 {% if current_user.is_authenticated %}
     <p>Hantera simmare och sessioner nedan.</p>
-    <ul class="manage-link-list">
-        <li><a href="{{ url_for('add_swimmers') }}">Lägg till simmare</a></li>
-        <li><a href="{{ url_for('manage_swimmers') }}">Hantera simmare</a></li>
-        <li><a href="{{ url_for('add_klockan_session') }}">Lägg till Klockan-session</a></li>
-        <li><a href="{{ url_for('manage_sessions') }}">Hantera sessioner</a></li>
-    </ul>
-    <p><a href="{{ url_for('logout') }}">Logga ut</a></p>
+    <a href="{{ url_for('add_swimmers') }}" class="nav-box">Lägg till simmare</a>
+    <a href="{{ url_for('manage_swimmers') }}" class="nav-box">Hantera simmare</a>
+    <a href="{{ url_for('add_klockan_session') }}" class="nav-box">Lägg till session</a>
+    <a href="{{ url_for('manage_sessions') }}" class="nav-box">Hantera sessioner</a>
+    <a href="#" class="nav-box nav-box-danger" id="logout-trigger"
+       onclick="document.getElementById('logout-trigger').style.display='none'; document.getElementById('logout-confirm').style.display='block'; return false;">Logga ut</a>
+    <div id="logout-confirm" class="logout-confirm-box" style="display:none;">
+        Är du säker på att du vill logga ut?
+        <div class="logout-confirm-actions">
+            <a href="{{ url_for('logout') }}" class="button-link deactivate-button">Ja, logga ut</a>
+            <button type="button" class="btn-cancel"
+                onclick="document.getElementById('logout-confirm').style.display='none'; document.getElementById('logout-trigger').style.display='block';">Avbryt</button>
+        </div>
+    </div>
 {% else %}
     <p>Du måste vara inloggad för att hantera simmare och sessioner.</p>
-    <p><a href="{{ url_for('login') }}">Logga in</a></p>
+    <a href="{{ url_for('login') }}" class="nav-box">Logga in</a>
 {% endif %}
 
 {% endblock %}
