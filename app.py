@@ -814,5 +814,20 @@ with app.app_context():
     db.create_all()
 
 
+@app.route("/setup-admin", methods=["GET", "POST"])
+def setup_admin():
+    if User.query.first():
+        return "Already set up.", 403
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        if not username or not password:
+            return render_template("setup_admin.html", error="Fyll i båda fälten.")
+        db.session.add(User(username=username, password_hash=generate_password_hash(password)))
+        db.session.commit()
+        return redirect(url_for("login"))
+    return render_template("setup_admin.html", error="")
+
+
 if __name__ == "__main__":
     app.run(debug=True)
