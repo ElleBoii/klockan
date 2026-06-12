@@ -604,8 +604,19 @@ button:hover {
         font-size: 0.9rem;
     }
 
+    /* Prevent grid cells from blowing out past container width */
     .filter-dropdowns {
         grid-template-columns: 1fr 1fr;
+    }
+
+    .filter-dropdowns .form-group {
+        min-width: 0;
+    }
+
+    select {
+        width: 100%;
+        box-sizing: border-box;
+        min-width: 0;
     }
 
     .filter-actions {
@@ -625,13 +636,26 @@ button:hover {
         text-align: center;
     }
 
+    /* Highscores table scrolls horizontally (7 columns) */
     .table-wrapper {
         overflow-x: auto;
         width: 100%;
     }
 
-    table {
+    .table-wrapper table {
         white-space: nowrap;
+    }
+
+    /* Session table fits within screen — no horizontal scroll */
+    .session-table-wrapper table {
+        white-space: normal;
+        width: 100%;
+    }
+
+    .session-table-wrapper th,
+    .session-table-wrapper td {
+        padding: 8px;
+        font-size: 0.85rem;
     }
 
     .session-group summary {
