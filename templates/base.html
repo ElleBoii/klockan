@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klockan Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Klockan Results</h1>
+        <nav class="tab-nav">
+            <a href="{{ url_for('index') }}" class="tab-link {% if request.endpoint == 'index' %}tab-active{% endif %}">Alla resultat</a>
+            <a href="{{ url_for('highscores') }}" class="tab-link {% if request.endpoint == 'highscores' %}tab-active{% endif %}">Highscores</a>
+            <a href="{{ url_for('manage_hub') }}" class="tab-link {% if request.endpoint == 'manage_hub' %}tab-active{% endif %}">Hantera</a>
+        </nav>
+        {% block content %}{% endblock %}
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

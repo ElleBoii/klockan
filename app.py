@@ -13,6 +13,8 @@ from models import (
     STROKES,
     EQUIPMENT_OPTIONS,
     POOL_LENGTHS,
+    STROKE_LABELS,
+    POOL_LENGTH_LABELS,
 )
 
 app = Flask(__name__)
@@ -70,7 +72,7 @@ def login():
             login_user(user)
             return redirect(url_for("index"))
         else:
-            message = "Invalid username or password."
+            message = "Ogiltigt användarnamn eller lösenord."
 
     return render_template("login.html", message=message)
 
@@ -88,48 +90,25 @@ def index():
     selected_stroke = request.args.get("stroke", "")
     selected_equipment = request.args.get("equipment", "")
     selected_pool_length = request.args.get("pool_length", "")
-    sort_by = request.args.get("sort_by", "")
-    sort_order = request.args.get("sort_order", "asc")
-    filter_applied = request.args.get("filter_applied", "0") == "1"
-    if filter_applied:
-        show_only_active = request.args.get("show_only_active", "0") == "1"
-    else:
-        show_only_active = True
-
-    swimmer_query = Swimmer.query
-    if show_only_active:
-        swimmer_query = swimmer_query.filter_by(is_active=True)
-    swimmers = swimmer_query.order_by(Swimmer.name).all()
+    sort_by = request.args.get("sort_by", "result")
+    sort_order = request.args.get("sort_order", "desc")
+    selected_year = request.args.get("year", "")
+    swimmers = Swimmer.query.order_by(Swimmer.name).all()
+    all_years = sorted({s.date[:4] for s in KlockanSession.query.all()}, reverse=True)
     results = KlockanResult.query.join(Swimmer).join(KlockanSession).all()
 
-    filtered_results = results
-
-    if show_only_active:
-        filtered_results = [r for r in filtered_results if r.swimmer.is_active]
+    filtered_results = list(results)
 
     if selected_swimmer:
-        filtered_results = [
-            result for result in filtered_results
-            if result.swimmer.name == selected_swimmer
-        ]
-
+        filtered_results = [r for r in filtered_results if r.swimmer.name == selected_swimmer]
     if selected_stroke:
-        filtered_results = [
-            result for result in filtered_results
-            if result.stroke == selected_stroke
-        ]
-
+        filtered_results = [r for r in filtered_results if r.stroke == selected_stroke]
     if selected_equipment:
-        filtered_results = [
-            result for result in filtered_results
-            if result.equipment == selected_equipment
-        ]
-
+        filtered_results = [r for r in filtered_results if r.equipment == selected_equipment]
     if selected_pool_length:
-        filtered_results = [
-            result for result in filtered_results
-            if result.session.pool_length == selected_pool_length
-        ]
+        filtered_results = [r for r in filtered_results if r.session.pool_length == selected_pool_length]
+    if selected_year:
+        filtered_results = [r for r in filtered_results if r.session.date.startswith(selected_year)]
 
     reverse_sort = sort_order == "desc"
 
@@ -148,21 +127,103 @@ def index():
     elif sort_by == "result":
         filtered_results = sorted(filtered_results, key=lambda x: x.failed_start_time, reverse=reverse_sort)
 
+    session_groups = {}
+    for result in filtered_results:
+        sid = result.session_id
+        if sid not in session_groups:
+            session_groups[sid] = {"session": result.session, "results": []}
+        session_groups[sid]["results"].append(result)
+
+    sessions_with_results = sorted(
+        session_groups.values(), key=lambda x: x["session"].date, reverse=True
+    )
+
+    for group in sessions_with_results:
+        round_map = {}
+        for result in group["results"]:
+            rn = result.round_number
+            if rn not in round_map:
+                round_map[rn] = []
+            round_map[rn].append(result)
+        group["rounds"] = sorted(round_map.items())
+
+    open_session_id = request.args.get("open_session", None)
+    try:
+        open_session_id = int(open_session_id) if open_session_id is not None else None
+    except ValueError:
+        open_session_id = None
+
     return render_template(
         "index.html",
         swimmers=swimmers,
         strokes=STROKES,
         equipment_options=EQUIPMENT_OPTIONS,
         pool_lengths=POOL_LENGTHS,
-        results=filtered_results,
+        stroke_labels=STROKE_LABELS,
+        pool_length_labels=POOL_LENGTH_LABELS,
+        all_years=all_years,
+        sessions_with_results=sessions_with_results,
+        has_results=bool(filtered_results),
         selected_swimmer=selected_swimmer,
         selected_stroke=selected_stroke,
         selected_equipment=selected_equipment,
         selected_pool_length=selected_pool_length,
+        selected_year=selected_year,
         sort_by=sort_by,
         sort_order=sort_order,
+        open_session_id=open_session_id,
+    )
+
+
+@app.route("/highscores")
+def highscores():
+    selected_stroke = request.args.get("stroke", "")
+    selected_equipment = request.args.get("equipment", "")
+    selected_pool_length = request.args.get("pool_length", "")
+    filter_applied = request.args.get("filter_applied", "0") == "1"
+    if filter_applied:
+        show_only_active = request.args.get("show_only_active", "0") == "1"
+    else:
+        show_only_active = True
+
+    results = KlockanResult.query.join(Swimmer).join(KlockanSession).all()
+    filtered_results = list(results)
+
+    if show_only_active:
+        filtered_results = [r for r in filtered_results if r.swimmer.is_active]
+    if selected_stroke:
+        filtered_results = [r for r in filtered_results if r.stroke == selected_stroke]
+    if selected_equipment:
+        filtered_results = [r for r in filtered_results if r.equipment == selected_equipment]
+    if selected_pool_length:
+        filtered_results = [r for r in filtered_results if r.session.pool_length == selected_pool_length]
+
+    best_by_swimmer = {}
+    for result in filtered_results:
+        sid = result.swimmer_id
+        if sid not in best_by_swimmer or result.failed_start_time < best_by_swimmer[sid].failed_start_time:
+            best_by_swimmer[sid] = result
+
+    top_results = sorted(best_by_swimmer.values(), key=lambda x: x.failed_start_time)[:10]
+
+    return render_template(
+        "highscores.html",
+        strokes=STROKES,
+        equipment_options=EQUIPMENT_OPTIONS,
+        pool_lengths=POOL_LENGTHS,
+        stroke_labels=STROKE_LABELS,
+        pool_length_labels=POOL_LENGTH_LABELS,
+        top_results=top_results,
+        selected_stroke=selected_stroke,
+        selected_equipment=selected_equipment,
+        selected_pool_length=selected_pool_length,
         show_only_active=show_only_active,
     )
+
+
+@app.route("/manage")
+def manage_hub():
+    return render_template("manage.html")
 
 
 @app.route("/add-swimmers")

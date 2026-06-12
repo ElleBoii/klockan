@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if current_user.is_authenticated %}
+    <p>Hantera simmare och sessioner nedan.</p>
+    <ul class="manage-link-list">
+        <li><a href="{{ url_for('add_swimmers') }}">Lägg till simmare</a></li>
+        <li><a href="{{ url_for('manage_swimmers') }}">Hantera simmare</a></li>
+        <li><a href="{{ url_for('add_klockan_session') }}">Lägg till Klockan-session</a></li>
+        <li><a href="{{ url_for('manage_sessions') }}">Hantera sessioner</a></li>
+    </ul>
+    <p><a href="{{ url_for('logout') }}">Logga ut</a></p>
+{% else %}
+    <p>Du måste vara inloggad för att hantera simmare och sessioner.</p>
+    <p><a href="{{ url_for('login') }}">Logga in</a></p>
+{% endif %}
+
+{% endblock %}

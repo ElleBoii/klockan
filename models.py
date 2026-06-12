@@ -28,6 +28,20 @@ POOL_LENGTHS = [
     "25 yards"
 ]
 
+STROKE_LABELS = {
+    "Freestyle": "Frisim",
+    "Backstroke": "Ryggsim",
+    "Breaststroke": "Bröstsim",
+    "Butterfly": "Fjärilsim",
+    "Medley": "Medley",
+}
+
+POOL_LENGTH_LABELS = {
+    "25 m": "25 m",
+    "50 m": "50 m",
+    "25 yards": "25 y",
+}
+
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)

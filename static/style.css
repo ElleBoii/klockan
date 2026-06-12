@@ -6,6 +6,7 @@ body {
     padding: 0;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    overflow-y: scroll;
 }
 
 .container {
@@ -19,6 +20,45 @@ body {
 
 h1, h2 {
     margin-top: 0;
+}
+
+.tab-nav {
+    display: flex;
+    border-bottom: 2px solid #dfe6ee;
+    margin-bottom: 28px;
+    gap: 0;
+}
+
+.tab-link {
+    padding: 10px 22px;
+    text-decoration: none;
+    color: #555;
+    font-weight: bold;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+}
+
+.tab-link:hover {
+    color: #3553a6;
+}
+
+.tab-active {
+    color: #3553a6;
+    border-bottom: 2px solid #3553a6;
+}
+
+.manage-link-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.manage-link-list a {
+    font-size: 1.05rem;
+    color: #3553a6;
 }
 
 .filter-form {
@@ -341,6 +381,122 @@ button:hover {
     background: #b71c1c;
 }
 
+.filter-details {
+    border: 1px solid #dfe6ee;
+    border-radius: 10px;
+    margin-bottom: 24px;
+}
+
+.filter-summary {
+    cursor: pointer;
+    padding: 12px 16px;
+    font-weight: bold;
+    list-style: none;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-summary::-webkit-details-marker {
+    display: none;
+}
+
+.filter-summary::before {
+    content: '▶';
+    font-size: 0.7rem;
+    color: #555;
+    transition: transform 0.15s;
+}
+
+.filter-details[open] .filter-summary::before {
+    transform: rotate(90deg);
+}
+
+.filter-active-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #3553a6;
+}
+
+.filter-details .filter-form {
+    padding: 0 16px 16px 16px;
+    margin: 0;
+}
+
+.session-group {
+    border: 1px solid #dfe6ee;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+
+.session-group summary {
+    cursor: pointer;
+    padding: 14px 16px;
+    background: #f0f4f8;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    list-style: none;
+    user-select: none;
+}
+
+.session-group summary::-webkit-details-marker {
+    display: none;
+}
+
+.session-group summary::before {
+    content: '▶';
+    font-size: 0.7rem;
+    color: #555;
+    transition: transform 0.15s;
+    flex-shrink: 0;
+}
+
+.session-group[open] summary::before {
+    transform: rotate(90deg);
+}
+
+.session-date {
+    font-weight: bold;
+}
+
+.session-pool {
+    color: #555;
+}
+
+.session-result-count {
+    color: #888;
+    font-size: 0.9rem;
+    margin-left: auto;
+}
+
+.session-table-wrapper {
+    overflow-x: auto;
+}
+
+.session-table-wrapper table {
+    margin-top: 0;
+    border-radius: 0;
+}
+
+.session-table-wrapper th {
+    background: #f7f9fc;
+}
+
+.round-header-row td {
+    background: #e8edf2;
+    font-weight: bold;
+    font-size: 0.85rem;
+    color: #555;
+    padding: 6px 12px;
+    letter-spacing: 0.03em;
+    border-top: 1px solid #cdd5de;
+}
+
 .clear-button {
     background: #d32f2f;
     color: white;
@@ -426,13 +582,26 @@ button:hover {
         overflow-x: hidden;
     }
 
+    h1 {
+        font-size: 1.5rem;
+    }
+
     .container {
         margin: 0;
-        padding: 20px 16px;
+        padding: 16px;
         border-radius: 0;
         box-shadow: none;
         box-sizing: border-box;
         width: 100%;
+    }
+
+    .tab-nav {
+        margin-bottom: 20px;
+    }
+
+    .tab-link {
+        padding: 8px 12px;
+        font-size: 0.9rem;
     }
 
     .filter-dropdowns {
@@ -440,8 +609,20 @@ button:hover {
     }
 
     .filter-actions {
-        flex-wrap: wrap;
-        gap: 12px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .checkbox-label {
+        align-self: flex-start;
+    }
+
+    .filter-actions button,
+    .filter-actions .clear-button {
+        width: 100%;
+        box-sizing: border-box;
+        text-align: center;
     }
 
     .table-wrapper {
@@ -451,6 +632,12 @@ button:hover {
 
     table {
         white-space: nowrap;
+    }
+
+    .session-group summary {
+        gap: 8px;
+        padding: 12px;
+        font-size: 0.95rem;
     }
 
     .simple-form {

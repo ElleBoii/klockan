@@ -1,183 +1,158 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klockan Results</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>Klockan Results</h1>
-        <p>Select a swimmer and filter the results.</p>
+{% extends 'base.html' %}
+{% block content %}
 
-        <p>
-            {% if current_user.is_authenticated %}
-                <a href="{{ url_for('add_swimmers') }}">Add swimmers</a> |
-                <a href="{{ url_for('manage_swimmers') }}">Manage swimmers</a> |
-                <a href="{{ url_for('add_klockan_session') }}">Add Klockan session</a> |
-                <a href="{{ url_for('manage_sessions') }}">Manage sessions</a> |
-                <a href="{{ url_for('logout') }}">Log out</a>
-            {% else %}
-                <a href="{{ url_for('login') }}">Log in</a>
-            {% endif %}
-        </p>
-
-        <form method="GET" class="filter-form">
-            <input type="hidden" name="filter_applied" value="1">
-            <div class="filter-dropdowns">
-                <div class="form-group">
-                    <label for="swimmer">Swimmer</label>
-                    <select name="swimmer" id="swimmer">
-                        <option value="">{% if show_only_active %}All active swimmers{% else %}All swimmers{% endif %}</option>
-                        {% for swimmer in swimmers %}
-                            <option value="{{ swimmer.name }}" {% if swimmer.name == selected_swimmer %}selected{% endif %}>
-                                {{ swimmer.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="stroke">Stroke</label>
-                    <select name="stroke" id="stroke">
-                        <option value="">All strokes</option>
-                        {% for stroke in strokes %}
-                            <option value="{{ stroke }}" {% if stroke == selected_stroke %}selected{% endif %}>
-                                {{ stroke }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="equipment">Equipment</label>
-                    <select name="equipment" id="equipment">
-                        <option value="">All equipment</option>
-                        {% for equipment in equipment_options %}
-                            <option value="{{ equipment }}" {% if equipment == selected_equipment %}selected{% endif %}>
-                                {{ equipment }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="pool_length">Pool length</label>
-                    <select name="pool_length" id="pool_length">
-                        <option value="">All pool lengths</option>
-                        {% for length in pool_lengths %}
-                            <option value="{{ length }}" {% if length == selected_pool_length %}selected{% endif %}>
-                                {{ length }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-
-            <div class="filter-actions">
-                <label class="checkbox-label">
-                    <input type="checkbox" name="show_only_active" value="1"
-                        {% if show_only_active %}checked{% endif %}>
-                    Show only active swimmers
-                </label>
-                <button type="submit">Filter results</button>
-                <a href="{{ url_for('index') }}" class="clear-button">Clear filters</a>
-            </div>
-        </form>
-
-        <h2>Results</h2>
-
-        {% if results %}
-            <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>
-                            <a href="{{ url_for('index',
-                                filter_applied=1,
-                                swimmer=selected_swimmer,
-                                stroke=selected_stroke,
-                                equipment=selected_equipment,
-                                pool_length=selected_pool_length,
-                                show_only_active=1 if show_only_active else 0,
-                                sort_by='stroke',
-                                sort_order='desc' if sort_by == 'stroke' and sort_order == 'asc' else 'asc') }}">
-                                Stroke
-                            </a>
-                        </th>
-                        <th>
-                            <a href="{{ url_for('index',
-                                filter_applied=1,
-                                swimmer=selected_swimmer,
-                                stroke=selected_stroke,
-                                equipment=selected_equipment,
-                                pool_length=selected_pool_length,
-                                show_only_active=1 if show_only_active else 0,
-                                sort_by='equipment',
-                                sort_order='desc' if sort_by == 'equipment' and sort_order == 'asc' else 'asc') }}">
-                                Equipment
-                            </a>
-                        </th>
-                        <th>
-                            <a href="{{ url_for('index',
-                                filter_applied=1,
-                                swimmer=selected_swimmer,
-                                stroke=selected_stroke,
-                                equipment=selected_equipment,
-                                pool_length=selected_pool_length,
-                                show_only_active=1 if show_only_active else 0,
-                                sort_by='result',
-                                sort_order='desc' if sort_by == 'result' and sort_order == 'asc' else 'asc') }}">
-                                Result (s)
-                            </a>
-                        </th>
-                        <th>
-                            <a href="{{ url_for('index',
-                                filter_applied=1,
-                                swimmer=selected_swimmer,
-                                stroke=selected_stroke,
-                                equipment=selected_equipment,
-                                pool_length=selected_pool_length,
-                                show_only_active=1 if show_only_active else 0,
-                                sort_by='date',
-                                sort_order='desc' if sort_by == 'date' and sort_order == 'asc' else 'asc') }}">
-                                Date
-                            </a>
-                        </th>
-                        <th>
-                            <a href="{{ url_for('index',
-                                filter_applied=1,
-                                swimmer=selected_swimmer,
-                                stroke=selected_stroke,
-                                equipment=selected_equipment,
-                                pool_length=selected_pool_length,
-                                show_only_active=1 if show_only_active else 0,
-                                sort_by='pool_length',
-                                sort_order='desc' if sort_by == 'pool_length' and sort_order == 'asc' else 'asc') }}">
-                                Pool
-                            </a>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for result in results %}
-                        <tr>
-                            <td>{{ result.swimmer.name }}</td>
-                            <td>{{ result.stroke }}</td>
-                            <td>{{ result.equipment }}</td>
-                            <td>{{ result.failed_start_time }}</td>
-                            <td>{{ result.session.date }}</td>
-                            <td>{{ result.session.pool_length }}</td>
-                        </tr>
+{% set filters_active = selected_swimmer or selected_stroke or selected_equipment or selected_pool_length or selected_year %}
+<details class="filter-details" {% if filters_active %}open{% endif %}>
+    <summary class="filter-summary">
+        Filter{% if filters_active %} <span class="filter-active-dot"></span>{% endif %}
+    </summary>
+    <form method="GET" class="filter-form">
+        <div class="filter-dropdowns">
+            <div class="form-group">
+                <label for="swimmer">Namn</label>
+                <select name="swimmer" id="swimmer">
+                    <option value="">Alla simmare</option>
+                    {% for swimmer in swimmers %}
+                        <option value="{{ swimmer.name }}" {% if swimmer.name == selected_swimmer %}selected{% endif %}>
+                            {{ swimmer.name }}
+                        </option>
                     {% endfor %}
-                </tbody>
-            </table>
+                </select>
             </div>
-        {% else %}
-            <p>No results match the selected filters.</p>
-        {% endif %}
-    </div>
-</body>
-</html>
+
+            <div class="form-group">
+                <label for="stroke">Simsätt</label>
+                <select name="stroke" id="stroke">
+                    <option value="">Alla simsätt</option>
+                    {% for stroke in strokes %}
+                        <option value="{{ stroke }}" {% if stroke == selected_stroke %}selected{% endif %}>
+                            {{ stroke_labels.get(stroke, stroke) }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="equipment">Utrustning</label>
+                <select name="equipment" id="equipment">
+                    <option value="">All utrustning</option>
+                    {% for equipment in equipment_options %}
+                        <option value="{{ equipment }}" {% if equipment == selected_equipment %}selected{% endif %}>
+                            {{ equipment }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="pool_length">Bassänglängd</label>
+                <select name="pool_length" id="pool_length">
+                    <option value="">Alla bassänglängder</option>
+                    {% for length in pool_lengths %}
+                        <option value="{{ length }}" {% if length == selected_pool_length %}selected{% endif %}>
+                            {{ pool_length_labels.get(length, length) }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="year">År</label>
+                <select name="year" id="year">
+                    <option value="">Alla år</option>
+                    {% for year in all_years %}
+                        <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>
+                            {{ year }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="filter-actions">
+            <button type="submit">Filtrera resultat</button>
+            <a href="{{ url_for('index') }}" class="clear-button">Rensa filter</a>
+        </div>
+    </form>
+</details>
+
+<h2>Resultat</h2>
+
+{% if has_results %}
+    {% for group in sessions_with_results %}
+    <details class="session-group" {% if open_session_id == group.session.id %}open{% endif %}>
+        <summary class="session-summary">
+            <span class="session-date">{{ group.session.date }}</span>
+            <span class="session-pool">{{ pool_length_labels.get(group.session.pool_length, group.session.pool_length) }}</span>
+            <span class="session-result-count">{{ group.results | length }} resultat</span>
+        </summary>
+        <div class="session-table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Namn</th>
+                    <th>
+                        <a href="{{ url_for('index',
+                            swimmer=selected_swimmer,
+                            stroke=selected_stroke,
+                            equipment=selected_equipment,
+                            pool_length=selected_pool_length,
+                            year=selected_year,
+                            open_session=group.session.id,
+                            sort_by='stroke',
+                            sort_order='asc' if sort_by == 'stroke' and sort_order == 'desc' else 'desc') }}">
+                            Simsätt{% if sort_by == 'stroke' %} {{ '↑' if sort_order == 'asc' else '↓' }}{% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ url_for('index',
+                            swimmer=selected_swimmer,
+                            stroke=selected_stroke,
+                            equipment=selected_equipment,
+                            pool_length=selected_pool_length,
+                            year=selected_year,
+                            open_session=group.session.id,
+                            sort_by='equipment',
+                            sort_order='asc' if sort_by == 'equipment' and sort_order == 'desc' else 'desc') }}">
+                            Utrustning{% if sort_by == 'equipment' %} {{ '↑' if sort_order == 'asc' else '↓' }}{% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ url_for('index',
+                            swimmer=selected_swimmer,
+                            stroke=selected_stroke,
+                            equipment=selected_equipment,
+                            pool_length=selected_pool_length,
+                            year=selected_year,
+                            open_session=group.session.id,
+                            sort_by='result',
+                            sort_order='asc' if sort_by == 'result' and sort_order == 'desc' else 'desc') }}">
+                            Resultat (s){% if sort_by == 'result' %} {{ '↑' if sort_order == 'asc' else '↓' }}{% endif %}
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for round_number, round_results in group.rounds %}
+                <tr class="round-header-row">
+                    <td colspan="4">Omgång {{ round_number }}</td>
+                </tr>
+                {% for result in round_results %}
+                <tr>
+                    <td>{{ result.swimmer.name }}</td>
+                    <td>{{ stroke_labels.get(result.stroke, result.stroke) }}</td>
+                    <td>{{ result.equipment }}</td>
+                    <td>{{ result.failed_start_time }}</td>
+                </tr>
+                {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </details>
+    {% endfor %}
+{% else %}
+    <p>Inga resultat matchar de valda filtren.</p>
+{% endif %}
+
+{% endblock %}

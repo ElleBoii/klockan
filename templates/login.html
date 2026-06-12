@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log in</title>
+    <title>Logga in</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Log in</h1>
+        <h1>Logga in</h1>
 
-        <p><a href="{{ url_for('index') }}">Back to results</a></p>
+        <p><a href="{{ url_for('index') }}">Tillbaka till resultat</a></p>
 
         {% if message %}
             <p class="message">{{ message }}</p>
@@ -18,16 +18,16 @@
 
         <form method="POST" class="simple-form">
             <div class="form-group">
-                <label for="username">Username</label>
+                <label for="username">Användarnamn</label>
                 <input type="text" id="username" name="username" required autofocus>
             </div>
 
             <div class="form-group">
-                <label for="password">Password</label>
+                <label for="password">Lösenord</label>
                 <input type="password" id="password" name="password" required>
             </div>
 
-            <button type="submit">Log in</button>
+            <button type="submit">Logga in</button>
         </form>
     </div>
 </body>

@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<form method="GET" class="filter-form">
+    <input type="hidden" name="filter_applied" value="1">
+    <div class="filter-dropdowns">
+        <div class="form-group">
+            <label for="stroke">Simsätt</label>
+            <select name="stroke" id="stroke">
+                <option value="">Alla simsätt</option>
+                {% for stroke in strokes %}
+                    <option value="{{ stroke }}" {% if stroke == selected_stroke %}selected{% endif %}>
+                        {{ stroke_labels.get(stroke, stroke) }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="equipment">Utrustning</label>
+            <select name="equipment" id="equipment">
+                <option value="">All utrustning</option>
+                {% for equipment in equipment_options %}
+                    <option value="{{ equipment }}" {% if equipment == selected_equipment %}selected{% endif %}>
+                        {{ equipment }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="pool_length">Bassänglängd</label>
+            <select name="pool_length" id="pool_length">
+                <option value="">Alla bassänglängder</option>
+                {% for length in pool_lengths %}
+                    <option value="{{ length }}" {% if length == selected_pool_length %}selected{% endif %}>
+                        {{ pool_length_labels.get(length, length) }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="filter-actions">
+        <label class="checkbox-label">
+            <input type="checkbox" name="show_only_active" value="1"
+                {% if show_only_active %}checked{% endif %}>
+            Visa endast aktiva simmare
+        </label>
+        <button type="submit">Filtrera resultat</button>
+        <a href="{{ url_for('highscores') }}" class="clear-button">Rensa filter</a>
+    </div>
+</form>
+
+<h2>Topp 10</h2>
+
+{% if top_results %}
+    <div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Namn</th>
+                <th>Resultat (s)</th>
+                <th>Simsätt</th>
+                <th>Utrustning</th>
+                <th>Datum</th>
+                <th>Bassäng</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in top_results %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ result.swimmer.name }}</td>
+                <td>{{ result.failed_start_time }}</td>
+                <td>{{ stroke_labels.get(result.stroke, result.stroke) }}</td>
+                <td>{{ result.equipment }}</td>
+                <td>{{ result.session.date }}</td>
+                <td>{{ pool_length_labels.get(result.session.pool_length, result.session.pool_length) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+{% else %}
+    <p>Inga resultat matchar de valda filtren.</p>
+{% endif %}
+
+{% endblock %}
