@@ -435,10 +435,11 @@ def add_klockan_round_result(round_number):
     stroke = request.form.get("stroke", "").strip()
     equipment = request.form.get("equipment", "").strip()
     failed_start_time = request.form.get("failed_start_time", "").strip()
+    show_only_active = request.form.get("show_only_active", "1")
 
     if not swimmer_id or not stroke or not equipment or not failed_start_time:
         session["klockan_message"] = "Fyll i alla fält."
-        return redirect(url_for("add_klockan_round", round_number=round_number))
+        return redirect(url_for("add_klockan_round", round_number=round_number, show_only_active=show_only_active))
 
     try:
         swimmer_id = int(swimmer_id)
@@ -465,7 +466,7 @@ def add_klockan_round_result(round_number):
     })
     save_pending_klockan(pending)
 
-    return redirect(url_for("add_klockan_round", round_number=round_number, stroke=stroke, equipment=equipment))
+    return redirect(url_for("add_klockan_round", round_number=round_number, stroke=stroke, equipment=equipment, show_only_active=show_only_active))
 
 
 @app.route("/add-klockan-round/<int:round_number>/remove", methods=["POST"])
@@ -812,21 +813,6 @@ def save_klockan_session():
 
 with app.app_context():
     db.create_all()
-
-
-@app.route("/setup-admin", methods=["GET", "POST"])
-def setup_admin():
-    if User.query.first():
-        return "Already set up.", 403
-    if request.method == "POST":
-        username = request.form.get("username", "").strip()
-        password = request.form.get("password", "")
-        if not username or not password:
-            return render_template("setup_admin.html", error="Fyll i båda fälten.")
-        db.session.add(User(username=username, password_hash=generate_password_hash(password)))
-        db.session.commit()
-        return redirect(url_for("login"))
-    return render_template("setup_admin.html", error="")
 
 
 if __name__ == "__main__":

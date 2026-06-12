@@ -13,10 +13,8 @@
 
         <a href="{{ url_for('manage_hub') }}" class="back-box">Tillbaka</a>
 
-        <div class="session-info-box">
-            <strong>Datum:</strong> {{ session_info.date }}<br>
-            <strong>Bassänglängd:</strong> {{ pool_length_labels.get(session_info.pool_length, session_info.pool_length) }}<br>
-            <strong>Max omgångar:</strong> {{ session_info.max_rounds }}
+        <div class="session-info-box session-info-compact">
+            {{ session_info.date }} &nbsp;·&nbsp; {{ pool_length_labels.get(session_info.pool_length, session_info.pool_length) }} &nbsp;·&nbsp; {{ session_info.max_rounds }} omg.
         </div>
 
         {% if message %}
@@ -24,6 +22,7 @@
         {% endif %}
 
         <form method="POST" action="{{ url_for('add_klockan_round_result', round_number=round_number) }}" class="simple-form">
+            <input type="hidden" name="show_only_active" value="{{ '1' if show_only_active else '0' }}">
             <div class="form-group">
                 <label class="checkbox-label">
                     <input type="checkbox" id="show_only_active_toggle" {% if show_only_active %}checked{% endif %}

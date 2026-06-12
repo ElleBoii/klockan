@@ -282,6 +282,13 @@ input, select, button {
     line-height: 1.6;
 }
 
+.session-info-compact {
+    padding: 8px 14px;
+    margin: 12px 0 16px 0;
+    font-size: 0.95rem;
+    color: #444;
+}
+
 .simple-form {
     display: grid;
     gap: 18px;
